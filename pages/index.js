@@ -223,7 +223,6 @@ export default function PowerMarketDashboard() {
         {/* 头部 */}
         <div className="dashboard-header">
           <h1>⚡ 电力市场预测与投标优化系统</h1>
-          <p>基于 SVM + Random Forest + XGBoost 集成模型的智能决策支持平台</p>
         </div>
 
         {/* 标签导航 */}
@@ -279,39 +278,60 @@ export default function PowerMarketDashboard() {
               </button>
 
               {databaseStatus && (
-                <div className="results-container">
+                <div className="results-container fade-in">
                   <div className="metrics-grid">
-                    <div className="metric">
-                      <span className="metric-label">记录数</span>
-                      <span className="metric-value">{dbStats.recordCount}</span>
+                    <div className="metric-card metric-primary">
+                      <div className="metric-icon">📊</div>
+                      <div className="metric-content">
+                        <span className="metric-label">记录数</span>
+                        <span className="metric-value">{dbStats.recordCount}</span>
+                      </div>
                     </div>
-                    <div className="metric">
-                      <span className="metric-label">平均电价</span>
-                      <span className="metric-value">
-                        {dbStats.avgPrice !== 'N/A' ? `${dbStats.avgPrice} 元/MWh` : 'N/A'}
-                      </span>
+                    <div className="metric-card metric-success">
+                      <div className="metric-icon">💰</div>
+                      <div className="metric-content">
+                        <span className="metric-label">平均电价</span>
+                        <span className="metric-value">
+                          {dbStats.avgPrice !== 'N/A' ? `${dbStats.avgPrice}` : 'N/A'}
+                        </span>
+                        {dbStats.avgPrice !== 'N/A' && <span className="metric-unit">元/MWh</span>}
+                      </div>
                     </div>
-                    <div className="metric">
-                      <span className="metric-label">最低电价</span>
-                      <span className="metric-value">
-                        {dbStats.minPrice !== 'N/A' ? `${dbStats.minPrice} 元/MWh` : 'N/A'}
-                      </span>
+                    <div className="metric-card metric-info">
+                      <div className="metric-icon">📉</div>
+                      <div className="metric-content">
+                        <span className="metric-label">最低电价</span>
+                        <span className="metric-value">
+                          {dbStats.minPrice !== 'N/A' ? `${dbStats.minPrice}` : 'N/A'}
+                        </span>
+                        {dbStats.minPrice !== 'N/A' && <span className="metric-unit">元/MWh</span>}
+                      </div>
                     </div>
-                    <div className="metric">
-                      <span className="metric-label">最高电价</span>
-                      <span className="metric-value">
-                        {dbStats.maxPrice !== 'N/A' ? `${dbStats.maxPrice} 元/MWh` : 'N/A'}
-                      </span>
+                    <div className="metric-card metric-warning">
+                      <div className="metric-icon">📈</div>
+                      <div className="metric-content">
+                        <span className="metric-label">最高电价</span>
+                        <span className="metric-value">
+                          {dbStats.maxPrice !== 'N/A' ? `${dbStats.maxPrice}` : 'N/A'}
+                        </span>
+                        {dbStats.maxPrice !== 'N/A' && <span className="metric-unit">元/MWh</span>}
+                      </div>
                     </div>
-                    <div className="metric">
-                      <span className="metric-label">数据来源</span>
-                      <span className="metric-value">{dbStats.dataSource}</span>
+                    <div className="metric-card metric-secondary">
+                      <div className="metric-icon">🗄️</div>
+                      <div className="metric-content">
+                        <span className="metric-label">数据来源</span>
+                        <span className="metric-value metric-value-small">{dbStats.dataSource}</span>
+                      </div>
                     </div>
-                    <div className="metric">
-                      <span className="metric-label">最后更新</span>
-                      <span className="metric-value">
-                        {databaseStatus.database?.lastUpdate || 'N/A'}
-                      </span>
+                    <div className="metric-card metric-dark">
+                      <div className="metric-icon">🕐</div>
+                      <div className="metric-content">
+                        <span className="metric-label">最后更新</span>
+                        <span className="metric-value metric-value-small">
+                          {databaseStatus.database?.lastUpdate || 'N/A'}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -338,29 +358,45 @@ export default function PowerMarketDashboard() {
               </div>
 
               {historicalData && (
-                <div className="results-container">
-                  <div className="metrics-grid">
-                    <div className="metric">
-                      <span className="metric-label">数据点数</span>
-                      <span className="metric-value">{histStats.count}</span>
+                <div className="results-container fade-in">
+                  <div className="metrics-grid metrics-grid-4">
+                    <div className="metric-card metric-primary">
+                      <div className="metric-icon">📍</div>
+                      <div className="metric-content">
+                        <span className="metric-label">数据点数</span>
+                        <span className="metric-value">{histStats.count}</span>
+                        <span className="metric-unit">个时间点</span>
+                      </div>
                     </div>
-                    <div className="metric">
-                      <span className="metric-label">平均价格</span>
-                      <span className="metric-value">
-                        {histStats.avgPrice !== 'N/A' ? `${histStats.avgPrice} 元/MWh` : 'N/A'}
-                      </span>
+                    <div className="metric-card metric-success">
+                      <div className="metric-icon">📊</div>
+                      <div className="metric-content">
+                        <span className="metric-label">平均价格</span>
+                        <span className="metric-value">
+                          {histStats.avgPrice !== 'N/A' ? `${histStats.avgPrice}` : 'N/A'}
+                        </span>
+                        {histStats.avgPrice !== 'N/A' && <span className="metric-unit">元/MWh</span>}
+                      </div>
                     </div>
-                    <div className="metric">
-                      <span className="metric-label">最低价格</span>
-                      <span className="metric-value">
-                        {histStats.minPrice !== 'N/A' ? `${histStats.minPrice} 元/MWh` : 'N/A'}
-                      </span>
+                    <div className="metric-card metric-info">
+                      <div className="metric-icon">⬇️</div>
+                      <div className="metric-content">
+                        <span className="metric-label">最低价格</span>
+                        <span className="metric-value">
+                          {histStats.minPrice !== 'N/A' ? `${histStats.minPrice}` : 'N/A'}
+                        </span>
+                        {histStats.minPrice !== 'N/A' && <span className="metric-unit">元/MWh</span>}
+                      </div>
                     </div>
-                    <div className="metric">
-                      <span className="metric-label">最高价格</span>
-                      <span className="metric-value">
-                        {histStats.maxPrice !== 'N/A' ? `${histStats.maxPrice} 元/MWh` : 'N/A'}
-                      </span>
+                    <div className="metric-card metric-warning">
+                      <div className="metric-icon">⬆️</div>
+                      <div className="metric-content">
+                        <span className="metric-label">最高价格</span>
+                        <span className="metric-value">
+                          {histStats.maxPrice !== 'N/A' ? `${histStats.maxPrice}` : 'N/A'}
+                        </span>
+                        {histStats.maxPrice !== 'N/A' && <span className="metric-unit">元/MWh</span>}
+                      </div>
                     </div>
                   </div>
 
@@ -412,21 +448,25 @@ export default function PowerMarketDashboard() {
               </button>
 
               {predictionResults && (
-                <div className="results-container">
-                  <div className="metrics-grid">
-                    <div className="metric">
-                      <span className="metric-label">预测数据点</span>
-                      <span className="metric-value">{predStats.count}</span>
+                <div className="results-container fade-in">
+                  <div className="metrics-grid metrics-grid-4">
+                    <div className="metric-card metric-primary">
+                      <div className="metric-icon">📊</div>
+                      <div className="metric-content">
+                        <span className="metric-label">预测数据点</span>
+                        <span className="metric-value">{predStats.count}</span>
+                        <span className="metric-unit">个时间点</span>
+                      </div>
                     </div>
-                    <div className="metric">
-                      <span className="metric-label">平均预测价格</span>
-                      <span className="metric-value">
-                        {predStats.avgPrice !== 'N/A' ? `${predStats.avgPrice} 元/MWh` : 'N/A'}
-                      </span>
-                    </div>
-                    <div className="metric">
-                      <span className="metric-label">算法来源</span>
-                      <span className="metric-value">{predStats.modelSource}</span>
+                    <div className="metric-card metric-success">
+                      <div className="metric-icon">💹</div>
+                      <div className="metric-content">
+                        <span className="metric-label">平均预测价格</span>
+                        <span className="metric-value">
+                          {predStats.avgPrice !== 'N/A' ? `${predStats.avgPrice}` : 'N/A'}
+                        </span>
+                        {predStats.avgPrice !== 'N/A' && <span className="metric-unit">元/MWh</span>}
+                      </div>
                     </div>
                   </div>
 
@@ -472,31 +512,46 @@ export default function PowerMarketDashboard() {
               </button>
 
               {optimizationResults && (
-                <div className="results-container">
-                  <div className="metrics-grid">
-                    <div className="metric highlight">
-                      <span className="metric-label">预期收益</span>
-                      <span className="metric-value">
-                        {optStats.expectedProfit !== 'N/A' ? `¥${optStats.expectedProfit}` : 'N/A'}
-                      </span>
+                <div className="results-container fade-in">
+                  <div className="metrics-grid metrics-grid-4">
+                    <div className="metric-card metric-warning">
+                      <div className="metric-icon">💰</div>
+                      <div className="metric-content">
+                        <span className="metric-label">预期收益</span>
+                        <span className="metric-value">
+                          {optStats.expectedProfit !== 'N/A' ? `¥${optStats.expectedProfit}` : 'N/A'}
+                        </span>
+                      </div>
                     </div>
-                    <div className="metric">
-                      <span className="metric-label">建议投标量</span>
-                      <span className="metric-value">
-                        {optStats.totalCapacity !== 'N/A' ? `${optStats.totalCapacity} MW` : 'N/A'}
-                      </span>
+                    <div className="metric-card metric-primary">
+                      <div className="metric-icon">⚡</div>
+                      <div className="metric-content">
+                        <span className="metric-label">建议投标量</span>
+                        <span className="metric-value">
+                          {optStats.totalCapacity !== 'N/A' ? `${optStats.totalCapacity}` : 'N/A'}
+                        </span>
+                        {optStats.totalCapacity !== 'N/A' && <span className="metric-unit">MW</span>}
+                      </div>
                     </div>
-                    <div className="metric">
-                      <span className="metric-label">平均成功概率</span>
-                      <span className="metric-value">
-                        {optStats.avgWinProb !== 'N/A' ? `${optStats.avgWinProb}%` : 'N/A'}
-                      </span>
+                    <div className="metric-card metric-success">
+                      <div className="metric-icon">🎯</div>
+                      <div className="metric-content">
+                        <span className="metric-label">平均成功概率</span>
+                        <span className="metric-value">
+                          {optStats.avgWinProb !== 'N/A' ? `${optStats.avgWinProb}` : 'N/A'}
+                        </span>
+                        {optStats.avgWinProb !== 'N/A' && <span className="metric-unit">%</span>}
+                      </div>
                     </div>
-                    <div className="metric">
-                      <span className="metric-label">建议价格</span>
-                      <span className="metric-value">
-                        {optStats.bidPrice !== 'N/A' ? `${optStats.bidPrice} 元/MWh` : 'N/A'}
-                      </span>
+                    <div className="metric-card metric-info">
+                      <div className="metric-icon">💵</div>
+                      <div className="metric-content">
+                        <span className="metric-label">建议价格</span>
+                        <span className="metric-value">
+                          {optStats.bidPrice !== 'N/A' ? `${optStats.bidPrice}` : 'N/A'}
+                        </span>
+                        {optStats.bidPrice !== 'N/A' && <span className="metric-unit">元/MWh</span>}
+                      </div>
                     </div>
                   </div>
 
