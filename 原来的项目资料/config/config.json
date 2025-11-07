@@ -1,0 +1,36 @@
+{
+    "data": {
+        "input_file": "data/rawdata.xlsx",
+        "training_ratio": 0.8,
+        "target_column": "實時出清電價"
+    },
+    "predictions": {
+        "output_dir": "output/predictions",
+        "save_models": true
+    },
+    "bidding": {
+        "output_dir": "output/bidding",
+        "strategy": "optimal",
+        "optimization_method": "neurodynamic",
+        "neurodynamic_params": {
+            "eta_base": 0.1,
+            "eta_min": 0.001,
+            "max_iter": 500,
+            "tolerance": 0.0001,
+            "patience": 50,
+            "adaptive_grid": true,
+            "fine_step": 0.1
+        }
+    },
+    "models": {
+        "use_lstm": true,
+        "use_rf": true,
+        "use_xgboost": true,
+        "use_historical": true,
+        "ensemble_weights": null
+    },
+    "logging": {
+        "level": "INFO",
+        "log_dir": "output/logs"
+    }
+}
