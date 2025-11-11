@@ -1,0 +1,16 @@
+{
+  "timestamp": "2025-11-10T11:34:02.665408",
+  "optimization_method": "neurodynamic",
+  "generation_cost": 380,
+  "upward_cost": 500,
+  "downward_cost": 300,
+  "max_power": 100,
+  "max_up_regulation": 3,
+  "max_down_regulation": 3,
+  "total_points": 1219,
+  "converged_points": 1219,
+  "convergence_rate": 100.0,
+  "avg_iterations": 19.616899097621,
+  "threshold_price": 354.49249999999955,
+  "fine_points": 1068
+}

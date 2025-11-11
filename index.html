@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>电力市场预测与投标优化系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            padding: 30px 0 20px;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        /* 导航栏 */
+        .nav-tabs {
+            display: flex;
+            background: white;
+            border-radius: 10px 10px 0 0;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 18px 20px;
+            text-align: center;
+            background: #f5f5f5;
+            border: none;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+            border-right: 1px solid #e0e0e0;
+            position: relative;
+        }
+
+        .nav-tab:last-child {
+            border-right: none;
+        }
+
+        .nav-tab:hover {
+            background: #e8f0fe;
+            color: #667eea;
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(135deg, #5cb85c 0%, #4cae4c 100%);
+            color: white;
+        }
+
+        .nav-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: white;
+        }
+
+        /* 内容区域 */
+        .content-area {
+            background: white;
+            border-radius: 0 0 10px 10px;
+            padding: 30px;
+            min-height: 500px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-title {
+            color: #333;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #5cb85c;
+        }
+
+        .upload-area {
+            border: 2px dashed #5cb85c;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f9f9f9;
+            margin-bottom: 20px;
+        }
+
+        .upload-area:hover {
+            background: #e8f5e9;
+            border-color: #4cae4c;
+        }
+
+        .upload-area input[type="file"] {
+            display: none;
+        }
+
+        .upload-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #5cb85c 0%, #4cae4c 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 6px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 10px 5px;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(92, 184, 92, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .info-box {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+
+        .success {
+            background: #d4edda;
+            border-left-color: #28a745;
+            color: #155724;
+        }
+
+        .error {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+            color: #721c24;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+            color: #856404;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        th {
+            background: linear-gradient(135deg, #5cb85c 0%, #4cae4c 100%);
+            color: white;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        tr:hover {
+            background: #f8f9ff;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-left: 4px solid #5cb85c;
+            padding: 20px;
+            border-radius: 6px;
+            text-align: left;
+        }
+
+        .stat-card .label {
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .quality-score {
+            font-size: 3em;
+            font-weight: bold;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .quality-excellent { color: #28a745; }
+        .quality-good { color: #17a2b8; }
+        .quality-fair { color: #ffc107; }
+        .quality-poor { color: #dc3545; }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .table-container {
+            max-height: 500px;
+            overflow-y: auto;
+            margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚡ 电力市场预测与投标优化系统</h1>
+        </div>
+
+        <!-- 导航栏 -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchTab('database')">
+                📊 数据库状态
+            </button>
+            <button class="nav-tab" onclick="switchTab('history')">
+                📈 历史数据
+            </button>
+            <button class="nav-tab" onclick="switchTab('prediction')">
+                🔮 预测价格
+            </button>
+            <button class="nav-tab" onclick="switchTab('optimization')">
+                ⚙️ 投标优化
+            </button>
+        </div>
+
+        <!-- 内容区域 -->
+        <div class="content-area">
+            <!-- 数据上传区域（所有标签页共享） -->
+            <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                <div class="upload-icon">📁</div>
+                <p style="font-size: 1.1em; font-weight: 600; margin-bottom: 8px;">点击上传数据文件</p>
+                <p style="color: #999; font-size: 0.9em;">支持 Excel (.xlsx, .xls) 和 CSV (.csv) 格式</p>
+                <input type="file" id="fileInput" accept=".xlsx,.xls,.csv">
+            </div>
+
+            <div class="loading" id="uploadLoading">
+                <div class="spinner"></div>
+                <p>正在上传和解析数据...</p>
+            </div>
+
+            <div id="uploadStatus"></div>
+
+            <!-- 标签页1: 数据库状态 -->
+            <div id="tab-database" class="tab-content active">
+                <h2 class="section-title">数据库状态</h2>
+
+                <div id="databaseContent">
+                    <p style="color: #999; text-align: center; padding: 40px;">请先上传数据文件</p>
+                </div>
+            </div>
+
+            <!-- 标签页2: 历史电价数据查询 -->
+            <div id="tab-history" class="tab-content">
+                <h2 class="section-title">历史电价数据查询</h2>
+
+                <div style="margin-bottom: 25px;">
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 10px; font-weight: 600; color: #333;">
+                            📅 选择日期：
+                        </label>
+                        <select id="queryDate" onchange="loadTimesForDate()"
+                                style="padding: 10px 15px; border: 1px solid #ddd; border-radius: 6px; font-size: 15px; width: 250px;">
+                            <option value="">-- 请选择日期 --</option>
+                        </select>
+                    </div>
+
+                    <div id="timeSelectContainer" style="margin-bottom: 20px; display: none;">
+                        <label style="display: block; margin-bottom: 10px; font-weight: 600; color: #333;">
+                            🕐 选择时刻：
+                        </label>
+                        <select id="queryTime"
+                                style="padding: 10px 15px; border: 1px solid #ddd; border-radius: 6px; font-size: 15px; width: 250px;">
+                            <option value="">-- 请先选择日期 --</option>
+                        </select>
+                    </div>
+
+                    <button class="btn" onclick="queryHistoryPrice()" style="margin-top: 10px;">
+                        🔍 查询电价
+                    </button>
+                </div>
+
+                <div id="historyContent">
+                    <p style="color: #999; text-align: center; padding: 40px;">请先上传数据文件，然后选择日期和时刻查询</p>
+                </div>
+            </div>
+
+            <!-- 标签页3: 预测价格 -->
+            <div id="tab-prediction" class="tab-content">
+                <h2 class="section-title">电价预测 - 所有模型对比</h2>
+
+                <div style="margin-bottom: 25px;">
+                    <button class="btn" onclick="predictOriginalWithFile()" style="font-size: 18px; padding: 15px 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        🚀 运行原项目预测
+                    </button>
+                </div>
+
+                <div class="loading" id="predictLoading">
+                    <div class="spinner"></div>
+                    <p>正在训练所有模型并预测，请稍候...</p>
+                </div>
+
+                <div id="predictionContent">
+                    <p style="color: #999; text-align: center; padding: 40px;">请先上传数据文件，然后点击"运行所有预测模型"查看结果</p>
+                </div>
+            </div>
+
+            <!-- 标签页4: 投标优化 -->
+            <div id="tab-optimization" class="tab-content">
+                <h2 class="section-title">投标策略优化</h2>
+
+                <div style="margin-bottom: 25px;">
+                    <button class="btn" onclick="runBiddingOptimization()" style="font-size: 18px; padding: 15px 40px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        🎯 运行投标优化
+                    </button>
+                </div>
+
+                <div class="loading" id="biddingLoading">
+                    <div class="spinner"></div>
+                    <p>正在运行投标优化，请稍候...</p>
+                </div>
+
+                <div id="biddingContent">
+                    <p style="color: #999; text-align: center; padding: 40px;">请先运行预测模型，然后点击"运行投标优化"查看投标策略</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5000';
+        let uploadedData = null;
+        let currentTab = 'database';
+
+        // 切换标签页
+        function switchTab(tabName) {
+            currentTab = tabName;
+
+            // 更新导航按钮状态
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // 更新内容区域
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+
+            // 如果切换到数据库状态且已上传数据，自动加载数据状态
+            if (tabName === 'database' && uploadedData) {
+                loadDatabaseStatus();
+            }
+        }
+
+        // 文件上传
+        document.getElementById('fileInput').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const statusDiv = document.getElementById('uploadStatus');
+            const loadingDiv = document.getElementById('uploadLoading');
+
+            loadingDiv.classList.add('active');
+            statusDiv.innerHTML = '';
+
+            try {
+                const response = await fetch(`${API_URL}/api/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                loadingDiv.classList.remove('active');
+
+                if (response.ok) {
+                    uploadedData = result.data;
+
+                    statusDiv.innerHTML = `
+                        <div class="info-box success">
+                            <strong>✅ 文件上传成功！</strong><br>
+                            📁 文件名: ${result.data.filename} |
+                            📊 数据行数: ${result.data.rows.toLocaleString()} |
+                            📋 列数: ${result.data.columns}
+                        </div>
+                    `;
+
+                    // 自动加载数据库状态
+                    if (currentTab === 'database') {
+                        loadDatabaseStatus();
+                    }
+
+                    // 加载可用日期列表
+                    loadAvailableDates();
+
+                } else {
+                    statusDiv.innerHTML = `<div class="info-box error"><strong>❌ 上传失败</strong><br>${result.error}</div>`;
+                }
+            } catch (error) {
+                loadingDiv.classList.remove('active');
+                statusDiv.innerHTML = `<div class="info-box error"><strong>❌ 上传失败</strong><br>${error.message}</div>`;
+            }
+        });
+
+        // 加载数据库状态
+        async function loadDatabaseStatus() {
+            const contentDiv = document.getElementById('databaseContent');
+
+            contentDiv.innerHTML = '<div class="loading active"><div class="spinner"></div><p>正在分析数据...</p></div>';
+
+            try {
+                const response = await fetch(`${API_URL}/api/data-status`);
+                const result = await response.json();
+
+                if (response.ok) {
+                    // 统计卡片
+                    const statsHtml = `
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="label">总行数</div>
+                                <div class="value">${result.basic_info.rows.toLocaleString()}</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="label">总列数</div>
+                                <div class="value">${result.basic_info.columns}</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="label">数据质量</div>
+                                <div class="value">${result.data_quality_score}%</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="label">内存占用</div>
+                                <div class="value">${result.basic_info.memory_usage}</div>
+                            </div>
+                        </div>
+                    `;
+
+                    // 列信息表格
+                    const columnTable = createColumnInfoTable(result.column_info);
+
+                    contentDiv.innerHTML = `
+                        ${statsHtml}
+                        <h3 style="margin-top: 30px; margin-bottom: 15px; color: #333; font-size: 1.2em;">数据列详情（共 ${result.column_info.length} 列）</h3>
+                        ${columnTable}
+                    `;
+
+                } else {
+                    contentDiv.innerHTML = `<div class="info-box error"><strong>❌ 加载失败</strong><br>${result.error}</div>`;
+                }
+            } catch (error) {
+                contentDiv.innerHTML = `<div class="info-box error"><strong>❌ 加载失败</strong><br>${error.message}</div>`;
+            }
+        }
+
+        // 加载可用日期列表（仅用于历史查询标签页）
+        async function loadAvailableDates() {
+            const dateSelect = document.getElementById('queryDate');
+
+            try {
+                const response = await fetch(`${API_URL}/api/available-dates`);
+                const result = await response.json();
+
+                if (response.ok) {
+                    // 清空现有选项
+                    dateSelect.innerHTML = '<option value="">-- 请选择日期 --</option>';
+
+                    // 添加日期选项
+                    result.dates.forEach(date => {
+                        const option = document.createElement('option');
+                        option.value = date;
+                        option.textContent = date;
+                        dateSelect.appendChild(option);
+                    });
+
+                    console.log(`已加载 ${result.count} 个可用日期`);
+                } else {
+                    console.error('加载日期列表失败:', result.error);
+                }
+            } catch (error) {
+                console.error('加载日期列表失败:', error);
+            }
+        }
+
+        // 当选择日期后，加载该日期的所有时刻
+        async function loadTimesForDate() {
+            const dateInput = document.getElementById('queryDate');
+            const timeSelect = document.getElementById('queryTime');
+            const timeContainer = document.getElementById('timeSelectContainer');
+            const contentDiv = document.getElementById('historyContent');
+
+            if (!dateInput.value) {
+                timeContainer.style.display = 'none';
+                timeSelect.innerHTML = '<option value="">-- 请先选择日期 --</option>';
+                return;
+            }
+
+            if (!uploadedData) {
+                contentDiv.innerHTML = '<div class="info-box error">请先上传数据文件</div>';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/query-price`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        date: dateInput.value
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.detail && result.detail.length > 0) {
+                    // 显示时刻选择器
+                    timeContainer.style.display = 'block';
+
+                    // 填充时刻选项
+                    timeSelect.innerHTML = '<option value="">-- 查看全天数据 --</option>';
+                    result.detail.forEach(row => {
+                        const timeStr = row.time.split(' ')[1] || row.time; // 提取时刻部分
+                        const option = document.createElement('option');
+                        option.value = row.time;
+                        option.textContent = timeStr;
+                        timeSelect.appendChild(option);
+                    });
+
+                    contentDiv.innerHTML = '<div class="info-box info">✅ 已加载该日期的所有时刻，请选择具体时刻查询，或直接点击"查询电价"查看全天数据</div>';
+                } else {
+                    timeContainer.style.display = 'none';
+                    contentDiv.innerHTML = `<div class="info-box error">该日期没有数据</div>`;
+                }
+            } catch (error) {
+                timeContainer.style.display = 'none';
+                contentDiv.innerHTML = `<div class="info-box error">加载时刻失败: ${error.message}</div>`;
+            }
+        }
+
+        // 查询历史电价
+        async function queryHistoryPrice() {
+            const dateInput = document.getElementById('queryDate');
+            const timeInput = document.getElementById('queryTime');
+            const contentDiv = document.getElementById('historyContent');
+
+            if (!dateInput.value) {
+                contentDiv.innerHTML = '<div class="info-box error">请选择查询日期</div>';
+                return;
+            }
+
+            if (!uploadedData) {
+                contentDiv.innerHTML = '<div class="info-box error">请先上传数据文件</div>';
+                return;
+            }
+
+            contentDiv.innerHTML = '<div class="loading active"><div class="spinner"></div><p>正在查询数据...</p></div>';
+
+            try {
+                const response = await fetch(`${API_URL}/api/query-price`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        date: dateInput.value,
+                        time: timeInput.value || null  // 如果选择了时刻，则传递时刻
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    const timeInput = document.getElementById('queryTime');
+                    const isSpecificTime = timeInput.value !== '';
+
+                    let html = '';
+
+                    // 如果查询的是特定时刻，显示单个数据卡片
+                    if (isSpecificTime && result.detail.length === 1) {
+                        const data = result.detail[0];
+                        html = `
+                            <div class="info-box success" style="margin-bottom: 20px;">
+                                <h3 style="margin: 0 0 15px 0; color: #28a745; font-size: 1.3em;">
+                                    📍 ${data.time}
+                                </h3>
+                            </div>
+                            <div class="stats-grid">
+                                <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                                    <div class="label" style="color: rgba(255,255,255,0.9);">电价</div>
+                                    <div class="value" style="color: white; font-size: 2.5em;">${data.price ? data.price.toFixed(2) : 'N/A'}</div>
+                                    <div style="margin-top: 5px; font-size: 0.9em; color: rgba(255,255,255,0.8);">元/MWh</div>
+                                </div>
+                                ${data.load !== undefined ? `
+                                <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+                                    <div class="label" style="color: rgba(255,255,255,0.9);">负荷</div>
+                                    <div class="value" style="color: white; font-size: 2.5em;">${data.load ? data.load.toFixed(0) : 'N/A'}</div>
+                                    <div style="margin-top: 5px; font-size: 0.9em; color: rgba(255,255,255,0.8);">MW</div>
+                                </div>
+                                ` : ''}
+                            </div>
+                        `;
+                    } else {
+                        // 显示全天数据的统计和表格
+                        const statsHtml = `
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <div class="label">数据点数</div>
+                                    <div class="value">${result.stats.count}</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="label">平均价格</div>
+                                    <div class="value">${result.stats.mean.toFixed(2)} 元/MWh</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="label">最低价格</div>
+                                    <div class="value">${result.stats.min.toFixed(2)} 元/MWh</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="label">最高价格</div>
+                                    <div class="value">${result.stats.max.toFixed(2)} 元/MWh</div>
+                                </div>
+                            </div>
+                        `;
+
+                        // 详细数据表格
+                        let tableHtml = `
+                            <h3 style="margin-top: 30px; margin-bottom: 15px; color: #333; font-size: 1.2em;">
+                                详细数据（共 ${result.detail.length} 条）
+                            </h3>
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>时间</th>
+                                            <th>电价 (元/MWh)</th>
+                                            ${result.detail[0].load !== undefined ? '<th>负荷 (MW)</th>' : ''}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                        `;
+
+                        result.detail.forEach(row => {
+                            tableHtml += '<tr>';
+                            tableHtml += `<td>${row.time}</td>`;
+                            tableHtml += `<td><strong>${row.price ? row.price.toFixed(2) : 'N/A'}</strong></td>`;
+                            if (row.load !== undefined) {
+                                tableHtml += `<td>${row.load ? row.load.toFixed(0) : 'N/A'}</td>`;
+                            }
+                            tableHtml += '</tr>';
+                        });
+
+                        tableHtml += '</tbody></table></div>';
+                        html = statsHtml + tableHtml;
+                    }
+
+                    contentDiv.innerHTML = html;
+
+                } else {
+                    contentDiv.innerHTML = `<div class="info-box error"><strong>❌ 查询失败</strong><br>${result.error}</div>`;
+                }
+            } catch (error) {
+                contentDiv.innerHTML = `<div class="info-box error"><strong>❌ 查询失败</strong><br>${error.message}</div>`;
+            }
+        }
+
+        // 创建列信息表格
+        function createColumnInfoTable(columnInfo) {
+            if (!columnInfo || columnInfo.length === 0) return '';
+
+            let html = '<div class="table-container"><table><thead><tr>';
+            html += '<th>列名</th><th>数据类型</th><th>非空值</th><th>缺失值</th><th>缺失率</th><th>唯一值</th><th>统计信息</th>';
+            html += '</tr></thead><tbody>';
+
+            columnInfo.forEach(col => {
+                const missingClass = col.missing_percent > 10 ? 'style="color: #dc3545; font-weight: bold;"' : '';
+                html += '<tr>';
+                html += `<td><strong>${col.name}</strong></td>`;
+                html += `<td><span style="color: #666; font-size: 0.9em;">${col.dtype}</span></td>`;
+                html += `<td>${col.non_null_count.toLocaleString()}</td>`;
+                html += `<td ${missingClass}>${col.missing_count.toLocaleString()}</td>`;
+                html += `<td ${missingClass}>${col.missing_percent}%</td>`;
+                html += `<td>${col.unique_count.toLocaleString()}</td>`;
+
+                // 统计信息
+                if (col.statistics) {
+                    const stats = col.statistics;
+                    html += `<td style="font-size: 0.85em; line-height: 1.6;">
+                        <div>均值: <strong>${stats.mean ? stats.mean.toFixed(2) : 'N/A'}</strong></div>
+                        <div>中位: <strong>${stats.median ? stats.median.toFixed(2) : 'N/A'}</strong></div>
+                        <div>范围: ${stats.min ? stats.min.toFixed(2) : 'N/A'} ~ ${stats.max ? stats.max.toFixed(2) : 'N/A'}</div>
+                    </td>`;
+                } else {
+                    html += '<td style="color: #999;">-</td>';
+                }
+                html += '</tr>';
+            });
+
+            html += '</tbody></table></div>';
+            return html;
+        }
+
+        // 创建表格
+        function createTable(data, columnNames = null) {
+            if (!data || data.length === 0) return '';
+
+            const headers = columnNames || Object.keys(data[0]);
+            let html = '<table><thead><tr>';
+            headers.forEach(h => html += `<th>${h}</th>`);
+            html += '</tr></thead><tbody>';
+
+            data.forEach(row => {
+                html += '<tr>';
+                headers.forEach(h => {
+                    const value = row[h];
+                    let displayValue;
+                    if (value === null || value === undefined) {
+                        displayValue = '<span style="color: #999;">-</span>';
+                    } else if (typeof value === 'number') {
+                        displayValue = value.toFixed(2);
+                    } else {
+                        displayValue = value;
+                    }
+                    html += `<td>${displayValue}</td>`;
+                });
+                html += '</tr>';
+            });
+
+            html += '</tbody></table>';
+            return html;
+        }
+
+        // 预测价格
+        async function predictPrice() {
+            const modelSelect = document.getElementById('predictModel');
+            const selectedModel = modelSelect.value;
+
+            const loadingDiv = document.getElementById('predictLoading');
+            const contentDiv = document.getElementById('predictionContent');
+
+            try {
+                loadingDiv.classList.add('active');
+                contentDiv.innerHTML = '';
+
+                const response = await fetch(`${API_URL}/api/predict`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        model: selectedModel
+                    })
+                });
+
+                const result = await response.json();
+                loadingDiv.classList.remove('active');
+
+                if (response.ok && result.success) {
+                    // 显示预测结果
+                    let html = '<div class="info-box success">';
+                    html += `<strong>✅ 预测完成</strong><br>`;
+                    html += `预测日期范围: ${result.date_range}<br>`;
+                    html += `使用模型: ${result.model_name}<br>`;
+                    html += `训练数据量: ${result.train_size} 条<br>`;
+                    html += `预测数据量: ${result.predictions.length} 条`;
+                    html += '</div>';
+
+                    // 显示模型性能指标
+                    if (result.metrics) {
+                        html += '<div style="margin-top: 20px;"><h3 style="color: #333; margin-bottom: 15px;">📊 模型性能指标</h3>';
+                        html += '<div class="stats-grid">';
+                        html += `<div class="stat-card">
+                            <div class="label">平均绝对误差 (MAE)</div>
+                            <div class="value">${result.metrics.mae.toFixed(2)}</div>
+                        </div>`;
+                        html += `<div class="stat-card">
+                            <div class="label">均方根误差 (RMSE)</div>
+                            <div class="value">${result.metrics.rmse.toFixed(2)}</div>
+                        </div>`;
+                        html += `<div class="stat-card">
+                            <div class="label">决定系数 (R²)</div>
+                            <div class="value">${result.metrics.r2.toFixed(4)}</div>
+                        </div>`;
+                        html += `<div class="stat-card">
+                            <div class="label">平均绝对百分比误差</div>
+                            <div class="value">${result.metrics.mape.toFixed(2)}%</div>
+                        </div>`;
+                        html += '</div></div>';
+                    }
+
+                    // 显示预测结果表格
+                    html += '<div style="margin-top: 20px;"><h3 style="color: #333; margin-bottom: 15px;">📈 预测结果详情</h3>';
+                    html += '<div class="table-container"><table><thead><tr>';
+                    html += '<th>时间</th><th>预测电价 (元/MWh)</th><th>实际电价 (元/MWh)</th><th>误差</th><th>误差率</th>';
+                    html += '</tr></thead><tbody>';
+
+                    result.predictions.forEach(row => {
+                        const error = row.actual !== null ? (row.predicted - row.actual) : null;
+                        const errorPercent = (error !== null && row.actual !== 0) ? ((error / row.actual) * 100) : null;
+                        const errorClass = error !== null ? (Math.abs(error) > 50 ? 'style="color: #dc3545;"' : '') : '';
+
+                        html += '<tr>';
+                        html += `<td>${row.time}</td>`;
+                        html += `<td><strong>${row.predicted.toFixed(2)}</strong></td>`;
+                        html += `<td>${row.actual !== null ? row.actual.toFixed(2) : 'N/A'}</td>`;
+                        html += `<td ${errorClass}>${error !== null ? error.toFixed(2) : 'N/A'}</td>`;
+                        html += `<td ${errorClass}>${errorPercent !== null ? errorPercent.toFixed(2) + '%' : 'N/A'}</td>`;
+                        html += '</tr>';
+                    });
+
+                    html += '</tbody></table></div></div>';
+                    contentDiv.innerHTML = html;
+
+                } else {
+                    contentDiv.innerHTML = `<div class="info-box error"><strong>❌ 预测失败</strong><br>${result.error || '未知错误'}</div>`;
+                }
+            } catch (error) {
+                loadingDiv.classList.remove('active');
+                contentDiv.innerHTML = `<div class="info-box error"><strong>❌ 预测失败</strong><br>${error.message}</div>`;
+            }
+        }
+
+        // 使用原始数据文件运行原项目预测
+        async function predictOriginalWithFile() {
+            const loadingDiv = document.getElementById('predictLoading');
+            const contentDiv = document.getElementById('predictionContent');
+
+            try {
+                loadingDiv.classList.add('active');
+                contentDiv.innerHTML = '';
+
+                // 直接调用API，使用原始数据文件
+                const response = await fetch(`${API_URL}/api/predict-original-file`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({})
+                });
+
+                const result = await response.json();
+                loadingDiv.classList.remove('active');
+
+                if (response.ok && result.success) {
+                    displayOriginalPredictionResults(result);
+                } else {
+                    contentDiv.innerHTML = `<div class="info-box error"><strong>❌ 预测失败</strong><br>${result.error || '未知错误'}</div>`;
+                }
+            } catch (error) {
+                loadingDiv.classList.remove('active');
+                contentDiv.innerHTML = `<div class="info-box error"><strong>❌ 预测失败</strong><br>${error.message}</div>`;
+            }
+        }
+
+        // 运行原项目预测（使用上传的数据）
+        async function predictOriginal() {
+            const loadingDiv = document.getElementById('predictLoading');
+            const contentDiv = document.getElementById('predictionContent');
+
+            try {
+                loadingDiv.classList.add('active');
+                contentDiv.innerHTML = '';
+
+                const response = await fetch(`${API_URL}/api/predict-original`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({})
+                });
+
+                const result = await response.json();
+                loadingDiv.classList.remove('active');
+
+                if (response.ok && result.success) {
+                    displayOriginalPredictionResults(result);
+                } else {
+                    contentDiv.innerHTML = `<div class="info-box error"><strong>❌ 预测失败</strong><br>${result.error || '未知错误'}</div>`;
+                }
+            } catch (error) {
+                loadingDiv.classList.remove('active');
+                contentDiv.innerHTML = `<div class="info-box error"><strong>❌ 预测失败</strong><br>${error.message}</div>`;
+            }
+        }
+
+        // 显示原项目预测结果（通用函数）
+        function displayOriginalPredictionResults(result) {
+            const contentDiv = document.getElementById('predictionContent');
+
+            // 显示所有模型的性能对比
+            let html = '<div class="info-box success" style="background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%); border-left: 4px solid #667eea;">';
+            html += `<strong>⭐ 原项目预测完成（与VSCode运行结果一致）</strong><br>`;
+            html += `预测数据量: ${result.predictions.length} 条<br>`;
+            html += `运行模型数: ${result.model_names.length} 个<br>`;
+            html += `训练集大小: ${result.train_size} | 测试集大小: ${result.test_size}<br>`;
+            html += `使用特征: ${result.feature_names.join(', ')}`;
+            html += '</div>';
+
+            // 模型名称映射
+            const modelDisplayNames = {
+                'historical': '📅 历史同期',
+                'random_forest': '🌲 随机森林',
+                'linear_regression': '📊 线性回归',
+                'gradient_boosting': '📈 梯度提升',
+                'xgboost': '⚡ XGBoost',
+                'ensemble': '🏆 集成模型'
+            };
+
+            // 显示所有模型的性能指标对比
+            html += '<div style="margin-top: 25px;"><h3 style="color: #333; margin-bottom: 15px;">📊 模型性能对比（原项目结果）</h3>';
+            html += '<div class="table-container"><table><thead><tr>';
+            html += '<th>模型</th><th>MAE</th><th>RMSE</th><th>R²</th><th>MAPE</th><th>方向准确率</th>';
+            html += '</tr></thead><tbody>';
+
+            // 按MAE排序
+            const sortedModels = Object.entries(result.metrics).sort((a, b) => a[1].mae - b[1].mae);
+
+            sortedModels.forEach(([modelName, metrics], index) => {
+                const displayName = modelDisplayNames[modelName] || modelName;
+                const rowClass = index === 0 ? 'style="background: #e8f5e9;"' : '';
+                html += `<tr ${rowClass}>`;
+                html += `<td><strong>${displayName}</strong></td>`;
+                html += `<td>${metrics.mae.toFixed(2)}</td>`;
+                html += `<td>${metrics.rmse.toFixed(2)}</td>`;
+                html += `<td>${metrics.r2.toFixed(4)}</td>`;
+                html += `<td>${metrics.mape.toFixed(2)}%</td>`;
+                html += `<td>${metrics.direction_accuracy.toFixed(2)}%</td>`;
+                html += '</tr>';
+            });
+
+            html += '</tbody></table></div></div>';
+
+            // 显示预测结果表格（包含所有模型）
+            html += '<div style="margin-top: 25px;"><h3 style="color: #333; margin-bottom: 15px;">📈 预测结果详情（所有模型）</h3>';
+            html += '<div class="info-box" style="margin-bottom: 15px;">显示前100条数据，完整数据请查看下方表格</div>';
+            html += '<div class="table-container"><table><thead><tr>';
+            html += '<th>时间</th><th>实际电价</th>';
+
+            // 添加所有模型的列
+            result.model_names.forEach(modelName => {
+                const displayName = modelDisplayNames[modelName] || modelName;
+                html += `<th>${displayName}</th>`;
+            });
+
+            html += '</tr></thead><tbody>';
+
+            // 只显示前100条数据
+            const displayCount = Math.min(100, result.predictions.length);
+            for (let i = 0; i < displayCount; i++) {
+                const pred = result.predictions[i];
+                html += '<tr>';
+                html += `<td>${pred.time}</td>`;
+                html += `<td>${pred.actual.toFixed(2)}</td>`;
+
+                // 添加所有模型的预测值
+                result.model_names.forEach(modelName => {
+                    const predValue = pred[modelName];
+                    if (predValue !== undefined) {
+                        html += `<td>${predValue.toFixed(2)}</td>`;
+                    } else {
+                        html += '<td>-</td>';
+                    }
+                });
+
+                html += '</tr>';
+            }
+
+            html += '</tbody></table></div></div>';
+
+            contentDiv.innerHTML = html;
+        }
+
+        // 运行所有预测模型
+        async function predictAllModels() {
+            const loadingDiv = document.getElementById('predictLoading');
+            const contentDiv = document.getElementById('predictionContent');
+
+            try {
+                loadingDiv.classList.add('active');
+                contentDiv.innerHTML = '';
+
+                const response = await fetch(`${API_URL}/api/predict-all-models`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({})
+                });
+
+                const result = await response.json();
+                loadingDiv.classList.remove('active');
+
+                if (response.ok && result.success) {
+                    // 显示所有模型的性能对比
+                    let html = '<div class="info-box success">';
+                    html += `<strong>✅ 所有模型预测完成</strong><br>`;
+                    html += `预测数据量: ${result.predictions.length} 条<br>`;
+                    html += `运行模型数: ${result.model_names.length} 个`;
+                    html += '</div>';
+
+                    // 模型名称映射
+                    const modelDisplayNames = {
+                        'historical': '📅 历史同期',
+                        'random_forest': '🌲 随机森林',
+                        'linear_regression': '📊 线性回归',
+                        'gradient_boosting': '📈 梯度提升',
+                        'xgboost': '⚡ XGBoost',
+                        'ensemble': '🏆 集成模型'
+                    };
+
+                    // 显示所有模型的性能指标对比
+                    html += '<div style="margin-top: 25px;"><h3 style="color: #333; margin-bottom: 15px;">📊 模型性能对比</h3>';
+                    html += '<div class="table-container"><table><thead><tr>';
+                    html += '<th>模型</th><th>MAE</th><th>RMSE</th><th>R²</th><th>MAPE</th><th>方向准确率</th>';
+                    html += '</tr></thead><tbody>';
+
+                    // 按MAE排序
+                    const sortedModels = Object.entries(result.metrics).sort((a, b) => a[1].mae - b[1].mae);
+
+                    sortedModels.forEach(([modelName, metrics], index) => {
+                        const displayName = modelDisplayNames[modelName] || modelName;
+                        const rowClass = index === 0 ? 'style="background: #e8f5e9;"' : '';
+                        html += `<tr ${rowClass}>`;
+                        html += `<td><strong>${displayName}</strong></td>`;
+                        html += `<td>${metrics.mae.toFixed(2)}</td>`;
+                        html += `<td>${metrics.rmse.toFixed(2)}</td>`;
+                        html += `<td>${metrics.r2.toFixed(4)}</td>`;
+                        html += `<td>${metrics.mape.toFixed(2)}%</td>`;
+                        html += `<td>${metrics.direction_accuracy.toFixed(2)}%</td>`;
+                        html += '</tr>';
+                    });
+
+                    html += '</tbody></table></div></div>';
+
+                    // 显示预测结果表格（包含所有模型）
+                    html += '<div style="margin-top: 25px;"><h3 style="color: #333; margin-bottom: 15px;">📈 预测结果详情（所有模型）</h3>';
+                    html += '<div class="info-box" style="margin-bottom: 15px;">显示前100条数据，完整数据请查看下方表格</div>';
+                    html += '<div class="table-container"><table><thead><tr>';
+                    html += '<th>时间</th><th>实际电价</th>';
+
+                    // 添加所有模型的列
+                    result.model_names.forEach(modelName => {
+                        const displayName = modelDisplayNames[modelName] || modelName;
+                        html += `<th>${displayName}</th>`;
+                    });
+
+                    html += '</tr></thead><tbody>';
+
+                    // 只显示前100条数据
+                    const displayCount = Math.min(100, result.predictions.length);
+                    for (let i = 0; i < displayCount; i++) {
+                        const row = result.predictions[i];
+                        html += '<tr>';
+                        html += `<td>${row.time}</td>`;
+                        html += `<td><strong>${row.actual.toFixed(2)}</strong></td>`;
+
+                        // 添加所有模型的预测值
+                        result.model_names.forEach(modelName => {
+                            if (row[modelName] !== undefined) {
+                                const error = Math.abs(row[modelName] - row.actual);
+                                const errorClass = error > 50 ? 'style="color: #dc3545;"' : '';
+                                html += `<td ${errorClass}>${row[modelName].toFixed(2)}</td>`;
+                            } else {
+                                html += `<td>N/A</td>`;
+                            }
+                        });
+
+                        html += '</tr>';
+                    }
+
+                    if (result.predictions.length > displayCount) {
+                        html += `<tr><td colspan="${2 + result.model_names.length}" style="text-align: center; color: #666;">... 还有 ${result.predictions.length - displayCount} 条数据未显示 ...</td></tr>`;
+                    }
+
+                    html += '</tbody></table></div></div>';
+                    contentDiv.innerHTML = html;
+
+                } else {
+                    contentDiv.innerHTML = `<div class="info-box error"><strong>❌ 预测失败</strong><br>${result.error || '未知错误'}</div>`;
+                }
+            } catch (error) {
+                loadingDiv.classList.remove('active');
+                contentDiv.innerHTML = `<div class="info-box error"><strong>❌ 预测失败</strong><br>${error.message}</div>`;
+            }
+        }
+
+        // 运行投标优化
+        async function runBiddingOptimization() {
+            const loadingDiv = document.getElementById('biddingLoading');
+            const contentDiv = document.getElementById('biddingContent');
+
+            try {
+                loadingDiv.classList.add('active');
+                contentDiv.innerHTML = '';
+
+                console.log('开始投标优化...');
+
+                const response = await fetch(`${API_URL}/api/bidding/optimize`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+                loadingDiv.classList.remove('active');
+
+                if (!result.success) {
+                    contentDiv.innerHTML = `<div class="info-box error"><strong>❌ 优化失败</strong><br>${result.error || '未知错误'}</div>`;
+                    return;
+                }
+
+                console.log('投标优化结果:', result);
+
+                // 显示优化结果
+                let html = '<div style="margin-bottom: 30px;">';
+
+                // 1. 核心策略建议
+                if (result.strategy && result.strategy.threshold_price !== undefined) {
+                    const threshold = result.strategy.threshold_price;
+                    const c_g = result.summary?.generation_cost || 375;
+                    const p_max = result.summary?.max_power || 100;
+
+                    html += `
+                        <div class="info-box" style="background: linear-gradient(135deg, #f093fb15 0%, #f5576c15 100%); border-left: 4px solid #f093fb; margin-bottom: 20px;">
+                            <h3 style="margin-top: 0; color: #f093fb;">🎯 核心投标策略</h3>
+                            <div style="font-size: 16px; line-height: 1.8;">
+                                <p><strong>推荐门槛价格：</strong> <span style="color: #f5576c; font-size: 24px; font-weight: bold;">${threshold.toFixed(2)}</span> CNY/MWh</p>
+                                <p><strong>理论门槛价格（发电边际成本）：</strong> ${c_g.toFixed(2)} CNY/MWh</p>
+                                <hr style="border: none; border-top: 1px solid #ddd; margin: 15px 0;">
+                                <p><strong>策略详情：</strong></p>
+                                <ul style="margin: 10px 0; padding-left: 20px;">
+                                    <li>当预测的日前市场价格 <strong>&lt; ${threshold.toFixed(2)}</strong> 时：<br>
+                                        → 推荐申报电量：<strong style="color: #dc3545;">0 MW</strong><br>
+                                        → 原因：价格低于门槛，预期收益无法覆盖成本，不参与市场
+                                    </li>
+                                    <li style="margin-top: 10px;">当预测的日前市场价格 <strong>≥ ${threshold.toFixed(2)}</strong> 时：<br>
+                                        → 推荐申报电量：<strong style="color: #28a745;">${p_max.toFixed(0)} MW</strong> (最大出力)<br>
+                                        → 原因：价格高于门槛，预期收益为正，最大化出力获取利润
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // 2. 优化性能统计
+                if (result.summary) {
+                    const summary = result.summary;
+                    html += `
+                        <div class="info-box" style="margin-bottom: 20px;">
+                            <h3 style="margin-top: 0;">📊 优化性能统计</h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                                <div>
+                                    <strong>优化方法：</strong><br>
+                                    ${summary.optimization_method === 'neurodynamic' ? '神经动力学自适应网格' : 'SciPy'}
+                                </div>
+                                <div>
+                                    <strong>总优化点数：</strong><br>
+                                    ${summary.total_points || 0}
+                                </div>
+                                <div>
+                                    <strong>收敛点数：</strong><br>
+                                    ${summary.converged_points || 0} (${(summary.convergence_rate || 0).toFixed(1)}%)
+                                </div>
+                                <div>
+                                    <strong>平均迭代次数：</strong><br>
+                                    ${(summary.avg_iterations || 0).toFixed(1)}
+                                </div>
+                                ${summary.fine_points ? `
+                                <div>
+                                    <strong>细化网格点数：</strong><br>
+                                    ${summary.fine_points}
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // 3. 价格-电量投标曲线表格
+                if (result.strategy && result.strategy.strategy_table) {
+                    const table = result.strategy.strategy_table;
+                    const displayCount = Math.min(50, table.length); // 显示前50个点
+
+                    html += `
+                        <div style="margin-bottom: 20px;">
+                            <h3>📈 价格-电量投标曲线</h3>
+                            <div style="overflow-x: auto;">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>日前价格 (CNY/MWh)</th>
+                                            <th>建议申报电量 (MW)</th>
+                                            <th>预期收益</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                    `;
+
+                    for (let i = 0; i < displayCount; i++) {
+                        const row = table[i];
+                        const priceClass = row.p_da > 0 ? 'style="color: #28a745; font-weight: bold;"' : 'style="color: #dc3545;"';
+                        html += `
+                            <tr>
+                                <td>${row.da_price.toFixed(2)}</td>
+                                <td ${priceClass}>${row.p_da.toFixed(1)}</td>
+                                <td>${row.objective.toFixed(2)}</td>
+                            </tr>
+                        `;
+                    }
+
+                    if (table.length > displayCount) {
+                        html += `
+                            <tr>
+                                <td colspan="3" style="text-align: center; color: #999;">
+                                    ... 还有 ${table.length - displayCount} 个数据点未显示 ...
+                                </td>
+                            </tr>
+                        `;
+                    }
+
+                    html += `
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                html += '</div>';
+                contentDiv.innerHTML = html;
+
+            } catch (error) {
+                loadingDiv.classList.remove('active');
+                contentDiv.innerHTML = `<div class="info-box error"><strong>❌ 优化失败</strong><br>${error.message}</div>`;
+                console.error('投标优化错误:', error);
+            }
+        }
+
+    </script>
+</body>
+</html>
+
